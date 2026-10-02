@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FuelFlip - MPG, L/100km and km/L converter</title>
+<meta name="description" content="Convert MPG (US and UK), L/100 km and km/L, and compare the yearly fuel cost of two cars. Runs in your browser.">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#171d1a; color:#eaf2ee; line-height:1.6; }
+  .wrap { max-width:680px; margin:0 auto; padding:48px 20px 60px; }
+  .logo { font-size:46px; font-weight:800; } .logo span { color:#8fe05c; }
+  .tag { font-size:19px; margin-top:10px; color:#d4e2da; }
+  .cta { display:inline-block; margin-top:26px; background:#8fe05c; color:#171d1a; font-weight:700; padding:14px 30px; border-radius:12px; text-decoration:none; }
+  h2 { font-size:21px; margin:40px 0 10px; } li { color:#aebfb5; margin-bottom:8px; } ul { margin-left:20px; }
+  .demo { margin-top:26px; background:#212b26; border-radius:14px; padding:18px; display:flex; gap:18px; flex-wrap:wrap; } .demo div { flex:1; min-width:140px; } .demo b { display:block; font-size:28px; color:#8fe05c; }
+  footer { margin-top:50px; font-size:13px; color:#7c9186; } a { color:#8fe05c; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Fuel<span>Flip</span></div>
+  <div class="tag">That car does 30 MPG. This one does 8 L/100 km. Which is thirstier, and what is the gap in money? Flip it.</div>
+  <a class="cta" href="app.html">Convert my car &rarr;</a>
+  <div class="demo"><div><b>7.84</b>L/100 km for 30 mpg (US)</div><div><b>25</b>US mpg for 30 UK mpg</div><div><b>12.5</b>km/L for 8 L/100 km</div></div>
+  <h2>What you get</h2>
+  <ul><li>All four units at once: MPG US, MPG UK, L/100 km, km/L</li><li>Two cars compared on yearly fuel and cost</li><li>The right reciprocal math, not a simple multiply</li><li>Runs in your browser, nothing stored</li></ul>
+  <footer>Formula from <a href="https://greencalculus.com/convert/mpg-to-l-per-100km/">greencalculus.com</a>. Real consumption varies with how you drive.<br>App Factory project. <a href="https://ilanis-agent.github.io/app-factory/">See all apps</a></footer>
+</div>
+</body>
+</html>
