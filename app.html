@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FuelFlip - MPG, L/100km and km/L converter</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#171d1a; color:#eaf2ee; line-height:1.5; }
+  .wrap { max-width:640px; margin:0 auto; padding:26px 18px 60px; }
+  a { color:#8fe05c; } h1 { font-size:28px; } h1 span { color:#8fe05c; } .sub { color:#9db0a5; margin:4px 0 18px; }
+  .card { background:#212b26; border-radius:14px; padding:16px; margin-bottom:14px; }
+  label { display:block; font-size:13px; color:#9db0a5; margin:10px 0 4px; }
+  input, select { width:100%; padding:11px; border-radius:9px; border:1px solid #3d5247; background:#171d1a; color:#eaf2ee; font-size:16px; font-family:inherit; }
+  input.bad { border-color:#e0746a; }
+  .row { display:flex; gap:10px; } .row > div { flex:1; }
+  .grid { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; } .grid > div { flex:1; min-width:120px; background:#171d1a; border-radius:10px; padding:10px; } .grid b { display:block; font-size:22px; color:#8fe05c; } .grid span { font-size:12px; color:#9db0a5; }
+  .grid > div.me { outline:2px solid #8fe05c; }
+  .note { font-size:14px; color:#d4e2da; margin-top:10px; } h2 { font-size:17px; margin-bottom:8px; } .small { font-size:13px; color:#9db0a5; }
+  .win { color:#7be3a6; font-weight:700; }
+  .warn { background:#3d2a20; border:1px solid #b9703f; color:#ffddc4; padding:12px; border-radius:10px; margin-top:12px; font-size:14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Fuel<span>Flip</span></h1>
+  <div class="sub">Flip between MPG (US and UK), L/100 km and km/L, and see what the difference costs per year.</div>
+  <div class="card">
+    <div class="row"><div><label for="v">Fuel economy</label><input id="v" inputmode="decimal" value="30"></div><div><label for="u">Unit</label><select id="u"></select></div></div>
+    <div class="grid" id="conv"></div>
+  </div>
+  <div class="card">
+    <h2>Two cars, one year</h2>
+    <div class="row"><div><label for="ca">Car A (same unit)</label><input id="ca" inputmode="decimal" value="25"></div><div><label for="cb">Car B (same unit)</label><input id="cb" inputmode="decimal" value="40"></div></div>
+    <div class="row"><div><label for="km">Distance per year (km)</label><input id="km" inputmode="decimal" value="15000"></div><div><label for="pr">Fuel price per litre</label><input id="pr" inputmode="decimal" value="1.50"></div></div>
+    <div class="note" id="cmp"></div>
+  </div>
+  <div class="card"><h2>About this</h2><div class="small">MPG counts distance per fuel and L/100 km counts fuel per distance, so they are reciprocals: L/100 km = 235.215 / MPG (US) or 282.481 / MPG (UK), so 30 mpg (US) = 7.84 L/100 km (<a href="https://greencalculus.com/convert/mpg-to-l-per-100km/">source</a>). The constants come from 3.785411784 L per US gallon, 4.54609 L per UK gallon and 1.609344 km per mile. A UK mpg figure is higher than the US figure for the same car (30 UK mpg is about 25 US). Your real fuel use varies with driving and weather. Runs in your browser.</div></div>
+</div>
+<script src="engine.js"></script>
+<script>
+var $ = function (i) { return document.getElementById(i); };
+Object.keys(Fuel.UNITS).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = Fuel.UNITS[k]; $('u').appendChild(o); }); $('u').value = 'mpg-us';
+function num(id) { var v = $(id).value.trim(), ok = /^\d*\.?\d+$/.test(v) && +v > 0; $(id).className = ok ? '' : 'bad'; return ok ? parseFloat(v) : null; }
+function render() {
+  var v = num('v'), u = $('u').value;
+  if (v == null) { $('conv').innerHTML = '<div class="warn" id="err" style="flex:1 1 100%">Enter a number above 0.</div>'; }
+  else { var h = ''; Object.keys(Fuel.UNITS).forEach(function (k) { var r = Fuel.convert(v, u, k); h += '<div' + (k === u ? ' class="me"' : '') + '><b data-u="' + k + '">' + Fuel.fmt(r, r >= 100 ? 1 : 2) + '</b><span>' + Fuel.UNITS[k] + '</span></div>'; }); $('conv').innerHTML = h; }
+  var a = num('ca'), b = num('cb'), km = num('km'), pr = num('pr');
+  if (a == null || b == null || km == null || pr == null) { $('cmp').textContent = 'Enter positive numbers for both cars, the distance and the price.'; return; }
+  var la = Fuel.toL100(a, u), lb = Fuel.toL100(b, u), ya = Fuel.yearly(la, km, pr), yb = Fuel.yearly(lb, km, pr), cheap = ya.cost < yb.cost ? 'A' : 'B', diff = Math.abs(ya.cost - yb.cost);
+  $('cmp').innerHTML = 'Car A: ' + Fuel.fmt(la, 2) + ' L/100 km, ' + Fuel.fmt(ya.litres, 0) + ' L, <b id="costa">' + Fuel.fmt(ya.cost, 0) + '</b> a year.<br>Car B: ' + Fuel.fmt(lb, 2) + ' L/100 km, ' + Fuel.fmt(yb.litres, 0) + ' L, <b id="costb">' + Fuel.fmt(yb.cost, 0) + '</b> a year.<br>' + (diff < 0.5 ? '<span class="win" id="verdict">Same yearly cost.</span>' : '<span class="win" id="verdict">Car ' + cheap + ' saves ' + Fuel.fmt(diff, 0) + ' a year (' + Fuel.fmt(Math.abs(ya.litres - yb.litres), 0) + ' L).</span>');
+}
+['v', 'ca', 'cb', 'km', 'pr'].forEach(function (id) { $(id).oninput = render; }); $('u').onchange = render;
+render();
+</script>
+</body>
+</html>
